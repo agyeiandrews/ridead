@@ -1,15 +1,17 @@
-from django.contrib.auth.backends import ModelBackend
-from .models import User
+# user/authentication.py
+from django.contrib.auth.backends import BaseBackend
+from user.models import User  # Import your custom User model
+from django.contrib.auth import get_user_model
+from django.core.exceptions import ObjectDoesNotExist
 
-class PhoneNumberBackend(ModelBackend):
-    def authenticate(self, request, phone_number=None, password=None, **kwargs):
+class PhoneNumberBackend(BaseBackend):
+    def authenticate(self, request, phone_number=None, password=None):
         try:
-            # Attempt to find the user based on the phone_number
+            # Get the user by phone_number
             user = User.objects.get(phone_number=phone_number)
-        except User.DoesNotExist:
-            return None  # Return None if user not found
-
-        # Check the password against the hashed password stored in the database
-        if user.check_password(password):
-            return user
-        return None  # Return None if the password is incorrect
+            if user.check_password(password):
+                return user
+            else:
+                return None
+        except ObjectDoesNotExist:
+            return None

@@ -1,6 +1,8 @@
 from django.urls import reverse
 from rest_framework import generics
 from rest_framework.authentication import TokenAuthentication
+
+from user.authentication import PhoneNumberBackend
 from .models import User, UserProfile
 from .serializers import PasswordResetConfirmSerializer, PasswordResetRequestSerializer, UserProfileSerializer, UserSerializer
 from django.contrib.auth import authenticate, logout
@@ -87,7 +89,7 @@ class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
     
 class LoginAPIView(APIView):
     permission_classes = [AllowAny]
-
+    authentication_classes = [PhoneNumberBackend]
     def post(self, request):
         try:
             # Get username and password from request data
