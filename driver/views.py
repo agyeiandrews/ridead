@@ -2,7 +2,7 @@ from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from rest_framework_simplejwt.authentication import JWTAuthentication
-from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.parsers import MultiPartParser, FormParser,JSONParser
 from .models import Driver
 from .serializers import DriverSerializer
 
@@ -11,7 +11,7 @@ class DriverListView(generics.ListCreateAPIView):
     serializer_class = DriverSerializer
     permission_classes = [AllowAny]
     authentication_classes = [JWTAuthentication]
-    parser_classes = [MultiPartParser, FormParser]  # Add parser classes for file uploads
+    parser_classes = [MultiPartParser, FormParser, JSONParser]  # Add parser classes for file uploads
 
     def post(self, request, *args, **kwargs):
         serializer = DriverSerializer(data=request.data)
@@ -28,24 +28,24 @@ class DriverListView(generics.ListCreateAPIView):
 
 class DriverView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Driver.objects.all()
+    lookup_field = 'id'
     serializer_class = DriverSerializer
     permission_classes = [AllowAny]
     authentication_classes = [JWTAuthentication]
-
-    def get(self, request, *args, **kwargs):
-        driver = self.get_object()
-        serializer = DriverSerializer(driver)
-        return Response(serializer.data)
+    parser_classes = [JSONParser, MultiPartParser, FormParser]
 
     def put(self, request, *args, **kwargs):
-        driver = self.get_object()
-        serializer = DriverSerializer(driver, data=request.data)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data)
         if serializer.is_valid():
+            # If 'ad_link' field is not present in the request data,
+            # remove it from the validated data to prevent overwriting the existing ad_link
+            # if 'ad_link' not in request.data:
+            #     serializer.validated_data.pop('ad_link', None)
+
+             # Explicitly update the 'updated_at' field to the current time
+            serializer.validated_data['updated_at'] = timezone.now()
+
             serializer.save()
             return Response(serializer.data)
-        return Response(serializer.errors, status=400)
-
-    def delete(self, request, *args, **kwargs):
-        driver = self.get_object()
-        driver.delete()
-        return Response(status=204)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

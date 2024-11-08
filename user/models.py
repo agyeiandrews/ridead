@@ -9,24 +9,21 @@ import os
 from cloudinary.models import CloudinaryField
 
 # Create your models here.
-# def upload_to_user(instance, filename):
-#     return 'user_images/{filename}'.format(filename=filename)
 
-def upload_to_user(instance, filename):
-    extension = filename.split('.')[-1] if '.' in filename else 'jpg'  # Default to jpg if no extension
-    new_filename = f"{uuid4()}.{extension}"  # Generates a unique filename
-    return os.path.join('UserProfile', new_filename)
+# def upload_to_user(instance, filename):
+#     extension = filename.split('.')[-1] if '.' in filename else 'jpg'  # Default to jpg if no extension
+#     new_filename = f"{uuid4()}.{extension}"  # Generates a unique filename
+#     return os.path.join('UserProfile', new_filename)
 
 class User(AbstractUser):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     username = models.CharField(max_length=50, unique=True)
     password = models.CharField(max_length=100, null=False, blank=False)
-    phone_number = models.CharField(max_length=15, blank=True, null=True)
+    phone_number = models.CharField(max_length=15, unique=True)
     email = models.EmailField(max_length=50)
     role = models.ForeignKey(Role, on_delete=models.CASCADE, related_name='users', blank=True, null=True)
     location = models.CharField(max_length=100, blank=True, null=True)
     profile_picture = CloudinaryField('profile_picture', folder='UserProfile', blank=True, null=True)  # Specify folder
-    # image = models.ImageField(null=True,blank=True, upload_to=upload_to_user)
     status = models.BooleanField(default=True)
     created_on = models.DateTimeField(default=timezone.now)
 

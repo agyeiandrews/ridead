@@ -15,7 +15,7 @@ class UserSerializer(serializers.ModelSerializer):
     token = serializers.SerializerMethodField()
     # image = serializers.ImageField(required=False)
     status = serializers.BooleanField()
-
+    phone_number = serializers.CharField(max_length=15)
     role = RoleSerializer(read_only=True)
     role_id = serializers.PrimaryKeyRelatedField(queryset=Role.objects.all(), source='role')
     class Meta:

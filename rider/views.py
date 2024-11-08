@@ -33,23 +33,21 @@ class RiderView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [AllowAny]
     authentication_classes = [JWTAuthentication]
 
-    def get(self, request, *args, **kwargs):
-        Rider = self.get_object()
-        serializer = RiderSerializer(Rider)
-        return Response(serializer.data)
-
     def put(self, request, *args, **kwargs):
-        Rider = self.get_object()
-        serializer = RiderSerializer(Rider, data=request.data)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data)
         if serializer.is_valid():
+            # If 'ad_link' field is not present in the request data,
+            # remove it from the validated data to prevent overwriting the existing ad_link
+            # if 'ad_link' not in request.data:
+            #     serializer.validated_data.pop('ad_link', None)
+
+             # Explicitly update the 'updated_at' field to the current time
+            serializer.validated_data['updated_at'] = timezone.now()
+
             serializer.save()
             return Response(serializer.data)
-        return Response(serializer.errors, status=400)
-
-    def delete(self, request, *args, **kwargs):
-        Rider = self.get_object()
-        Rider.delete()
-        return Response(status=204)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class GenerateQRCodeView(generics.UpdateAPIView):

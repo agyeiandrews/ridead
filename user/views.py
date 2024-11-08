@@ -91,15 +91,15 @@ class LoginAPIView(APIView):
     def post(self, request):
         try:
             # Get username and password from request data
-            username = request.data.get('username')
+            phone_number = request.data.get('phone_number')
             password = request.data.get('password')
 
-            # Check if both username and password are provided
-            if not username or not password:
-                raise ValidationError("Username or password is missing")
+            # Check if both phone_number and password are provided
+            if not phone_number or not password:
+                raise ValidationError("Phone Number or password is missing")
 
             # Authenticate user
-            user = authenticate(request, username=username, password=password)
+            user = authenticate(request, phone_number=phone_number, password=password)
             if user is not None:
                 # Generate or retrieve token
                 refresh = RefreshToken.for_user(user)

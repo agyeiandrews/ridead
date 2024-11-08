@@ -6,8 +6,8 @@ from django.utils import timezone
 class Rider(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     full_name = models.CharField(max_length=50, blank=True, null=True)
-    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    rider_id = models.CharField(max_length=20, unique=True, editable=False)
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,blank=True, null=True)
+    rider_id = models.CharField(max_length=20, unique=True, editable=False, null=True, blank=True)
     phone_number = models.CharField(max_length=15, unique=True)
     points = models.PositiveIntegerField(default=0)  # For rewards
     registration_date = models.DateTimeField(auto_now_add=True)
@@ -20,6 +20,7 @@ class Rider(models.Model):
     license_number = models.CharField(max_length=50, blank=True, null=True)  # Driving license number
     status = models.CharField(max_length=10, choices=[('active', 'Active'), ('inactive', 'Inactive')], default='active')  # Rider status
     # bio = models.TextField(blank=True, null=True)  # Short biography
+    updated_at = models.DateTimeField(auto_now=True)  # Last updated timestamp
 
     def save(self, *args, **kwargs):
         if not self.rider_id:  # Only generate a new ID if it doesn't already exist
@@ -29,4 +30,4 @@ class Rider(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.user.username} - {self.rider_id}"
+        return f"{self.full_name} - {self.rider_id}"
